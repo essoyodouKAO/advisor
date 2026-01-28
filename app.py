@@ -10,15 +10,36 @@ from sklearn.metrics import accuracy_score, recall_score, f1_score
 from sklearn.preprocessing import LabelEncoder
 import os
 
-# 1. Configuration
+# 1. CONFIGURATION DE LA PAGE (Toujours en premier !)
 st.set_page_config(page_title="Loan Predictor Pro", page_icon="🏦", layout="wide")
 
-# 2. Chargement des données
+# 2. SYSTÈME DE MOT DE PASSE
+def check_password():
+    """Retourne True si l'utilisateur a saisi le bon mot de passe."""
+    def password_entered():
+        if st.session_state["password"] == st.secrets["password"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        st.text_input("Mot de passe :", type="password", on_change=password_entered, key="password")
+        return False
+    elif not st.session_state["password_correct"]:
+        st.text_input("Mot de passe :", type="password", on_change=password_entered, key="password")
+        st.error("😕 Mot de passe incorrect.")
+        return False
+    else:
+        return True
+
+if not check_password():
+    st.stop()  # On bloque tout si le MDP n'est pas bon
+
+# 3. CHARGEMENT DES DONNÉES
 @st.cache_data
 def load_and_clean_data():
     path = "loan_data.csv"
-    
-    # Vérification si le fichier existe sur le serveur
     if not os.path.exists(path):
         st.error(f"❌ Fichier '{path}' introuvable sur GitHub.")
         return pd.DataFrame(), pd.DataFrame()
@@ -26,18 +47,15 @@ def load_and_clean_data():
     try:
         data = pd.read_csv(path, encoding='latin-1')
         df_clean = data.copy()
-        
         if 'Loan_ID' in df_clean.columns:
             df_clean = df_clean.drop(columns=['Loan_ID'])
         
-        # Remplissage intelligent
         for col in df_clean.columns:
             if df_clean[col].dtype == 'object':
                 df_clean[col] = df_clean[col].fillna(df_clean[col].mode()[0])
             else:
                 df_clean[col] = df_clean[col].fillna(df_clean[col].median())
         
-        # Encodage
         le = LabelEncoder()
         for col in df_clean.select_dtypes(include=['object']).columns:
             df_clean[col] = le.fit_transform(df_clean[col])
@@ -49,7 +67,7 @@ def load_and_clean_data():
 
 df_raw, df_ml = load_and_clean_data()
 
-# 3. Sidebar
+# 4. SIDEBAR
 st.sidebar.header("⚙️ Paramètres du Modèle")
 choix_modele = st.sidebar.selectbox("Algorithme :", ["Logistic Regression", "Random Forest"])
 
@@ -60,11 +78,10 @@ else:
     n_trees = st.sidebar.slider("Nombre d'arbres", 10, 200, 100)
     model = RandomForestClassifier(n_estimators=n_trees)
 
-# 4. Interface Principale
+# 5. INTERFACE PRINCIPALE
 st.title("🏦 Advisor : Analyse & Prédiction de Prêts")
 
 if not df_raw.empty:
-    # Métriques dynamiques
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Total Dossiers", len(df_raw))
     
@@ -94,7 +111,6 @@ if not df_raw.empty:
             if st.button("🚀 Lancer l'apprentissage"):
                 model.fit(X_train, y_train)
                 y_pred = model.predict(X_test)
-                
                 m1, m2, m3 = st.columns(3)
                 m1.metric("Accuracy", f"{accuracy_score(y_test, y_pred):.2%}")
                 m2.metric("Recall", f"{recall_score(y_test, y_pred):.2%}")
