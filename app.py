@@ -133,4 +133,4 @@ if not df_raw.empty:
                 ax2.set_title("Revenu vs Montant du Prêt")
                 st.pyplot(fig2)
 else:
-    st.error("Impossible de trouver le fichier CSV. Vérifiez le chemin : C:\\Users\\emile\\Downloads\\loan_data(in).csv")
+    st.error("Impossible de trouver le fichier CSV. Vérifiez le chemin : C:\\Users\\emile\\Downloads\\loan_data.csv")
