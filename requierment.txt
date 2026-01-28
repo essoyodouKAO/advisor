@@ -1,22 +1,7 @@
-nltk
-
-
-
-
-import spacy
-from sklearn.model_selection import train_test_split
-
-nlp = spacy.load('fr_core_news_sm')
-
-# Fonction de lemmatisation (Page 10)
-def lemmatiser(texte):
-    doc = nlp(texte)
-    return " ".join([token.lemma_ for token in doc if not token.is_stop])
-
-# Application (cela peut prendre un peu de temps selon la taille du fichier)
-df['texte_final'] = df['texte_propre'].apply(lemmatiser)
-
-# Division : 80% entraînement, 20% test (Page 24)
-X_train_raw, X_test_raw, y_train, y_test = train_test_split(
-    df['texte_final'], df['label'], test_size=0.2, random_state=42
-)
+streamlit
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+plotly
