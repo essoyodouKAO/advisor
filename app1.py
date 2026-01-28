@@ -16,7 +16,7 @@ st.set_page_config(page_title="Loan Predictor Pro", page_icon="🏦", layout="wi
 @st.cache_data
 def load_and_clean_data():
     # UTILISE LE CHEMIN COMPLET AVEC 'r' DEVANT
-    path = r"C:\Users\emile\Downloads\loan_data(in).csv" 
+    path = "loan_data.csv"
     try:
         data = pd.read_csv(path, encoding='latin-1')
         
